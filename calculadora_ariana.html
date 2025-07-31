@@ -2,24 +2,24 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora de Calorias</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { margin: 0; padding: 0; background-color: #fff0f5; color: #212529; }
-    header { background-color: #ff69b4; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
+    body { margin: 0; padding: 0; background-color: #fff0f6; color: #880e4f; }
+    header { background-color: #c2185b; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
     .container { max-width: 700px; margin: auto; padding: 1rem; }
     .meal-section { margin-bottom: 2rem; }
     .meal-title { font-weight: bold; font-size: 1.1rem; margin: 1rem 0 0.5rem; }
     .input-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
     input, select, button { padding: 0.6rem; font-size: 0.95rem; width: 100%; }
     select { -webkit-appearance: none; }
-    button { background-color: #ff69b4; color: white; border: none; cursor: pointer; }
+    button { background-color: #ec407a; color: white; border: none; cursor: pointer; }
     table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-    th, td { border: 1px solid #dee2e6; padding: 0.5rem; text-align: left; font-size: 0.9rem; }
-    tfoot { font-weight: bold; background-color: #f8bbd0; }
+    th, td { border: 1px solid #f8bbd0; padding: 0.5rem; text-align: left; font-size: 0.9rem; }
+    tfoot { font-weight: bold; background-color: #fce4ec; }
     .total-diario { font-size: 1.2rem; font-weight: bold; margin-top: 1.5rem; text-align: center; }
     #chart-container { margin-top: 2rem; }
     #graficoCalorias { height: 300px !important; }
@@ -47,18 +47,96 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("user-name").textContent = nomeUsuario;
 
   const alimentos = {
-    "Melancia": 0.30, "Kiwi": 0.61, "Espinafre": 0.23, "Alface": 0.15,
-    "Banana": 0.89, "Maçã": 0.52, "Laranja": 0.47, "Mamão": 0.45, "Abacate": 1.60,
-    "Arroz branco": 1.30, "Arroz integral": 1.11, "Feijão preto": 1.34, "Batata doce": 0.86,
-    "Frango grelhado": 1.65, "Peito de frango": 1.65, "Carne bovina": 2.50,
-    "Ovo cozido": 1.43, "Ovo frito": 2.17, "Leite integral": 0.64,
-    "Leite desnatado": 0.36, "Iogurte natural": 0.63, "Queijo mussarela": 3.20,
-    "Pão francês": 2.65, "Pão integral": 2.50, "Bolo simples": 3.90,
-    "Biscoito recheado": 4.80, "Chocolate ao leite": 5.30, "Amendoim": 5.67,
-    "Chia": 4.86, "Linhaça": 5.34, "Azeite de oliva (1 colher sopa)": 1.19,
-    "Manteiga (1 colher sopa)": 1.02, "Óleo de soja (1 colher sopa)": 1.20,
-    "Bacon": 3.93, "Linguiça calabresa": 2.80,
-    "Café preto sem açúcar (1 xícara)": 0.02, "Café com açúcar (1 xícara)": 0.20
+    "🥘 Arroz branco cozido": 1.29,
+    "🥘 Arroz integral cozido": 1.11,
+    "🥘 Batata frita": 3.12,
+    "🥘 Batata frita na air fryer": 1.70,
+    "🥘 Bacon": 3.93,
+    "🥘 Carne de frango": 1.65,
+    "🥘 Carne Moída patinho": 1.40,
+    "🥘 Carne bovina magra": 2.50,
+    "🥘 Carne suína": 2.70,
+    "🥘 Cuscuz": 1.12,
+    "🥘 Feijão carioca cozido": 0.76,
+    "🥘 Feijão preto cozido": 0.77,
+    "🥘 Frango grelhado (peito)": 1.65,
+    "🥘 Grão-de-bico cozido": 1.64,
+    "🥘 Hambúrguer bovino": 2.50,
+    "🥘 Lentilha cozida": 1.16,
+    "🥘 Linguiça calabresa": 2.80,
+    "🥘 Macarrão cozido": 1.58,
+    "🥘 Macarrão integral cozido": 1.24,
+    "🥘 Nuggets de frango": 2.96,
+    "🥘 Omelete": 1.54,
+    "🥘 Ovo cozido": 0.68,
+    "🥘 Ovo frito sem gordura": 0.96,
+    "🥘 Peixe (tilápia)": 1.28,
+    "🥘 Pizza de muçarela (1 fatia)": 2.66,
+    "🥘 Pizza normal (1 fatia)": 2.85,
+    "🥘 Queijo Minas padrão": 3.60,
+    "🥘 Queijo minas frescal": 2.40,
+    "🥘 Queijo muçarela": 2.80,
+    "🥘 Quinoa cozida": 1.20,
+    "🥘 Requeijão": 2.57,
+    "🥘 Salmão": 2.08,
+    "🥬 Alface": 0.15,
+    "🥬 Abobrinha": 0.17,
+    "🥬 Beterraba": 0.43,
+    "🥬 Brócolis": 0.34,
+    "🥬 Cenoura": 0.41,
+    "🥬 Couve": 0.27,
+    "🥬 Espinafre": 0.23,
+    "🥬 Pepino": 0.16,
+    "🥬 Repolho": 0.25,
+    "🥬 Tomate": 0.18,
+    "🍎 Abacate": 1.60,
+    "🍎 Banana": 0.89,
+    "🍎 Kiwi": 0.61,
+    "🍎 Laranja": 0.47,
+    "🍎 Maçã": 0.52,
+    "🍎 Mamão": 0.43,
+    "🍎 Melancia": 0.30,
+    "🍎 Morango": 0.32,
+    "🍎 Pera": 0.57,
+    "🍎 Uva": 0.69,
+    "🍎 Açaí com xarope": 1.10,
+    "🍰 Barra de cereal": 0.92,
+    "🍰 Beijinho (1 unidade)": 0.85,
+    "🍰 Bala de goma (5 unidades)": 0.85,
+    "🍰 Biscoito recheado (3 unidades)": 1.80,
+    "🍰 Bolo recheado": 3.50,
+    "🍰 Bombom sortido (1 unidade)": 1.00,
+    "🍰 Brigadeiro (1 unidade)": 0.90,
+    "🍰 Chocolate ao leite (100g)": 5.35,
+    "🍰 Nutella (1 colher sopa)": 1.00,
+    "🍰 Paçoca (1 unidade)": 0.90,
+    "🍰 Pipoca de panela": 3.87,
+    "🍰 Pudim": 2.53,
+    "🍰 Sorvete (1 bola)": 1.30,
+    "🧃 Café preto sem açúcar (1 xícara)": 0.02,
+    "🧃 Café com açúcar (1 xícara)": 0.20,
+    "🧃 Iogurte natural": 0.63,
+    "🧃 Iogurte normal": 0.63,
+    "🧃 Leite integral": 0.61,
+    "🧃 Leite desnatado": 0.35,
+    "🧃 Leite em pó integral (2 col. sopa)": 0.99,
+    "🧃 Refrigerante (lata 350ml)": 1.40,
+    "🧃 Suco de caixinha 100%": 0.42,
+    "🧃 Suco de caixinha normal": 0.50,
+    "🧃 Suco em pó (preparado)": 0.65,
+    "🍣 Pão francês": 1.40,
+    "🍣 Pão integral": 1.10,
+    "🍣 Castanha-do-pará": 6.56,
+    "🍣 Amêndoas": 5.79,
+    "🍣 Nozes": 6.54,
+    "🍣 Amendoim": 5.67,
+    "🍣 Chia": 4.86,
+    "🍣 Linhaça": 5.34,
+    "🍣 Manteiga (1 colher sopa)": 1.02,
+    "🍣 Sushi cru (2 unidades)": 0.70,
+    "🍣 Sushi frito (2 unidades)": 1.10,
+    "🍣 Clara de ovo": 0.17,
+    "🍣 Aveia": 3.89
   };
 
   const refeicoes = [
