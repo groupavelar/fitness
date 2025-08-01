@@ -1,0 +1,280 @@
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Calorias</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; padding: 0; background-color: #e8f5e9; color: #1b5e20; }
+    header { background-color: #2e7d32; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
+    .container { max-width: 700px; margin: auto; padding: 1rem; }
+    .meal-section { margin-bottom: 2rem; }
+    .meal-title { font-weight: bold; font-size: 1.1rem; margin: 1rem 0 0.5rem; }
+    .input-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    input, select, button { padding: 0.6rem; font-size: 0.95rem; width: 100%; }
+    select { -webkit-appearance: none; }
+    button { background-color: #388e3c; color: white; border: none; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    th, td { border: 1px solid #a5d6a7; padding: 0.5rem; text-align: left; font-size: 0.9rem; }
+    tfoot { font-weight: bold; background-color: #c8e6c9; }
+    .total-diario { font-size: 1.2rem; font-weight: bold; margin-top: 1.5rem; text-align: center; }
+    #chart-container { margin-top: 2rem; }
+    #graficoCalorias { height: 300px !important; }
+    .btn-remove { background: transparent; color: red; cursor: pointer; border: none; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    Calculadora de Calorias – <span id="user-name">João Victor</span>
+  </header>
+  <div class="container" id="main"></div>
+  <div class="total-diario">
+    Total Diário: <span id="total-dia">0 kcal</span>
+    <br>
+    <button onclick="salvarDia()">Salvar Dia</button>
+  </div>
+  <div id="chart-container" class="container">
+    <canvas id="graficoCalorias"></canvas>
+    <br>
+    <button onclick="resetarGrafico()">Resetar Gráfico</button>
+  </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const nomeUsuario = "João Victor";
+  document.getElementById("user-name").textContent = nomeUsuario;
+
+  const alimentos = {
+    "🥘 Arroz branco cozido": 1.29,
+    "🥘 Arroz integral cozido": 1.11,
+    "🥘 Batata frita": 3.12,
+    "🥘 Batata frita na air fryer": 1.70,
+    "🥘 Bacon": 3.93,
+    "🥘 Carne de frango": 1.65,
+    "🥘 Carne Moída patinho": 1.40,
+    "🥘 Carne bovina magra": 2.50,
+    "🥘 Carne suína": 2.70,
+    "🥘 Cuscuz": 1.12,
+    "🥘 Feijão carioca cozido": 0.76,
+    "🥘 Feijão preto cozido": 0.77,
+    "🥘 Frango grelhado (peito)": 1.65,
+    "🥘 Grão-de-bico cozido": 1.64,
+    "🥘 Hambúrguer bovino": 2.50,
+    "🥘 Lentilha cozida": 1.16,
+    "🥘 Linguiça calabresa": 2.80,
+    "🥘 Macarrão cozido": 1.58,
+    "🥘 Macarrão integral cozido": 1.24,
+    "🥘 Nuggets de frango": 2.96,
+    "🥘 Omelete": 1.54,
+    "🥘 Ovo cozido": 0.68,
+    "🥘 Ovo frito sem gordura": 0.96,
+    "🥘 Peixe (tilápia)": 1.28,
+    "🥘 Pizza de muçarela (1 fatia)": 2.66,
+    "🥘 Pizza normal (1 fatia)": 2.85,
+    "🥘 Queijo Minas padrão": 3.60,
+    "🥘 Queijo minas frescal": 2.40,
+    "🥘 Queijo muçarela": 2.80,
+    "🥘 Quinoa cozida": 1.20,
+    "🥘 Requeijão": 2.57,
+    "🥘 Salmão": 2.08,
+    "🥬 Alface": 0.15,
+    "🥬 Abobrinha": 0.17,
+    "🥬 Beterraba": 0.43,
+    "🥬 Brócolis": 0.34,
+    "🥬 Cenoura": 0.41,
+    "🥬 Couve": 0.27,
+    "🥬 Espinafre": 0.23,
+    "🥬 Pepino": 0.16,
+    "🥬 Repolho": 0.25,
+    "🥬 Tomate": 0.18,
+    "🍎 Abacate": 1.60,
+    "🍎 Banana": 0.89,
+    "🍎 Kiwi": 0.61,
+    "🍎 Laranja": 0.47,
+    "🍎 Maçã": 0.52,
+    "🍎 Mamão": 0.43,
+    "🍎 Melancia": 0.30,
+    "🍎 Morango": 0.32,
+    "🍎 Pera": 0.57,
+    "🍎 Uva": 0.69,
+    "🍎 Açaí com xarope": 1.10,
+    "🍰 Barra de cereal": 0.92,
+    "🍰 Beijinho (1 unidade)": 0.85,
+    "🍰 Bala de goma (5 unidades)": 0.85,
+    "🍰 Biscoito recheado (3 unidades)": 1.80,
+    "🍰 Bolo recheado": 3.50,
+    "🍰 Bombom sortido (1 unidade)": 1.00,
+    "🍰 Brigadeiro (1 unidade)": 0.90,
+    "🍰 Chocolate ao leite (100g)": 5.35,
+    "🍰 Nutella (1 colher sopa)": 1.00,
+    "🍰 Paçoca (1 unidade)": 0.90,
+    "🍰 Pipoca de panela": 3.87,
+    "🍰 Pudim": 2.53,
+    "🍰 Sorvete (1 bola)": 1.30,
+    "🧃 Café preto sem açúcar (1 xícara)": 0.02,
+    "🧃 Café com açúcar (1 xícara)": 0.20,
+    "🧃 Iogurte natural": 0.63,
+    "🧃 Iogurte normal": 0.63,
+    "🧃 Leite integral": 0.61,
+    "🧃 Leite desnatado": 0.35,
+    "🧃 Leite em pó integral (2 col. sopa)": 0.99,
+    "🧃 Refrigerante (lata 350ml)": 1.40,
+    "🧃 Suco de caixinha 100%": 0.42,
+    "🧃 Suco de caixinha normal": 0.50,
+    "🧃 Suco em pó (preparado)": 0.65,
+    "🍣 Pão francês": 1.40,
+    "🍣 Pão integral": 1.10,
+    "🍣 Castanha-do-pará": 6.56,
+    "🍣 Amêndoas": 5.79,
+    "🍣 Nozes": 6.54,
+    "🍣 Amendoim": 5.67,
+    "🍣 Chia": 4.86,
+    "🍣 Linhaça": 5.34,
+    "🍣 Manteiga (1 colher sopa)": 1.02,
+    "🍣 Sushi cru (2 unidades)": 0.70,
+    "🍣 Sushi frito (2 unidades)": 1.10,
+    "🍣 Clara de ovo": 0.17,
+    "🍣 Aveia": 3.89
+  };
+  const refeicoes = [
+    "Café da manhã", "Refeição pós café", "Almoço",
+    "Lanche da tarde", "Jantar", "Ceia da noite"
+  ];
+
+  function normalizar(str) {
+    return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/\s+/g, "-");
+  }
+
+  const main = document.getElementById("main");
+  let dadosHistorico = JSON.parse(localStorage.getItem("calorias-historico") || "[]");
+  let dadosHoje = JSON.parse(localStorage.getItem("refeicoes-hoje") || "{}");
+
+  window.adicionar = function(ref) {
+    const id = normalizar(ref);
+    const sel = document.getElementById(`sel-${id}`);
+    const qtdInput = document.getElementById(`qtd-${id}`);
+    const qtd = parseFloat(qtdInput.value);
+    if (!qtd || qtd <= 0) return;
+    const alim = sel.value;
+    const kcal = alimentos[alim] * qtd;
+    if (!dadosHoje[ref]) dadosHoje[ref] = [];
+    dadosHoje[ref].push({ alim, qtd, kcal });
+    localStorage.setItem("refeicoes-hoje", JSON.stringify(dadosHoje));
+    atualizarTabela(ref);
+    atualizarTotal();
+    qtdInput.value = "";
+  }
+
+  window.removerItem = function(ref, index) {
+    dadosHoje[ref].splice(index, 1);
+    localStorage.setItem("refeicoes-hoje", JSON.stringify(dadosHoje));
+    atualizarTabela(ref);
+    atualizarTotal();
+  }
+
+  function atualizarTabela(ref) {
+    const id = normalizar(ref);
+    const tbody = document.querySelector(`#tab-${id} tbody`);
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    let total = 0;
+    (dadosHoje[ref] || []).forEach((item, index) => {
+      total += item.kcal;
+      tbody.innerHTML += `<tr><td>${item.alim}</td><td>${item.qtd}</td><td>${item.kcal.toFixed(2)}</td><td><button class='btn-remove' onclick="removerItem('${ref}', ${index})">×</button></td></tr>`;
+    });
+    const totalEl = document.getElementById(`total-${id}`);
+    if (totalEl) totalEl.textContent = total.toFixed(2);
+  }
+
+  function atualizarTotal() {
+    let total = 0;
+    for (const ref in dadosHoje) {
+      dadosHoje[ref].forEach(e => total += e.kcal);
+    }
+    document.getElementById("total-dia").textContent = total.toFixed(2) + " kcal";
+  }
+
+  window.salvarDia = function() {
+    let total = 0;
+    for (const ref in dadosHoje) {
+      dadosHoje[ref].forEach(e => total += e.kcal);
+    }
+    const hoje = new Date().toISOString().split('T')[0];
+    dadosHistorico.push({ dia: hoje, kcal: total });
+    localStorage.setItem("calorias-historico", JSON.stringify(dadosHistorico));
+    localStorage.removeItem("refeicoes-hoje");
+    localStorage.setItem("ultima-salvaguarda", hoje);
+    location.reload();
+  }
+
+  window.resetarGrafico = function() {
+    if (confirm("Tem certeza que deseja apagar todo o histórico?")) {
+      localStorage.removeItem("calorias-historico");
+      location.reload();
+    }
+  }
+
+  function desenharGrafico() {
+    const ctx = document.getElementById('graficoCalorias').getContext('2d');
+    const dias = dadosHistorico.map(e => e.dia);
+    const valores = dadosHistorico.map(e => e.kcal);
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: dias,
+        datasets: [{ label: 'Kcal consumidas', data: valores, backgroundColor: '#2e7d32' }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  function salvarDiaAutomaticamenteSeForNovo() {
+    const hoje = new Date().toISOString().split('T')[0];
+    const salvo = localStorage.getItem("ultima-salvaguarda");
+    if (salvo && salvo === hoje) return;
+    salvarDia();
+  }
+
+  function checarViradaDoDia() {
+    const agora = new Date();
+    const proximaMeiaNoite = new Date();
+    proximaMeiaNoite.setHours(24, 0, 0, 0);
+    const tempoRestante = proximaMeiaNoite - agora;
+    setTimeout(() => {
+      salvarDiaAutomaticamenteSeForNovo();
+      checarViradaDoDia();
+    }, tempoRestante);
+  }
+
+  function renderizarRefeicoes() {
+    refeicoes.forEach(ref => {
+      const id = normalizar(ref);
+      const sec = document.createElement('div');
+      sec.className = 'meal-section';
+      sec.innerHTML = `
+        <div class="meal-title">${ref}</div>
+        <div class="input-row">
+          <select id="sel-${id}">
+            ${Object.keys(alimentos).map(alim => `<option value="${alim}">${alim}</option>`).join('')}
+          </select>
+          <input id="qtd-${id}" type="number" min="0" step="0.1" placeholder="Qtd (100g)" />
+          <button onclick="adicionar('${ref}')">Adicionar</button>
+        </div>
+        <table id="tab-${id}"><thead><tr><th>Alimento</th><th>Qtd</th><th>kcal</th><th></th></tr></thead><tbody></tbody><tfoot><tr><td colspan="2">Total</td><td id="total-${id}">0</td><td></td></tr></tfoot></table>
+      `;
+      main.appendChild(sec);
+    });
+  }
+
+  renderizarRefeicoes();
+  for (const ref in dadosHoje) atualizarTabela(ref);
+  atualizarTotal();
+  desenharGrafico();
+  checarViradaDoDia();
+});
+</script>
+</body>
+</html>
